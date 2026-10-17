@@ -18,8 +18,10 @@ const Checkout = () => {
  
   const handleSuccess = () => { 
     setShowModal(false); 
-    alert('🎉 Payment Successful! Now complete your company registration & setup password.'); 
     
+    // Direct Admin Panel par bhejne ki bajaye Registration Success page par bhejien:
+    navigate('/registration-success'); 
+  };
     // Yahan hum user ko Register / Company setup page ya live admin panel par bhejenge:
     // Agar aapka internal registration page '/register-company' hai toh woh likhein,
     // ya direct live admin panel par bhejna ho toh window.location.href use karein:
@@ -149,6 +151,6 @@ const Checkout = () => {
       )} 
     </div> 
   ); 
-}; 
+ 
  
 export default Checkout;
