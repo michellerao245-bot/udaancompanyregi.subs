@@ -5,16 +5,19 @@ const PaymentGatewayModal = ({ amount = 0, onSuccess, onClose }) => {
   const [payMethod, setPayMethod] = useState('card'); 
   const [autoDebit, setAutoDebit] = useState(true); // Auto-debit checked by default
 
-  const handlePayment = (e) => { 
-    e.preventDefault(); 
-    setLoading(true); 
-
-    // Fake 2-second processing delay for setting up recurring mandate
-    setTimeout(() => { 
-      setLoading(false); 
-      onSuccess(); 
-    }, 2000); 
-  }; 
+  const handlePayment = (e) => {  
+    e.preventDefault();  
+    setLoading(true);  
+ 
+    // Fake 2-second processing delay for setting up recurring mandate 
+    setTimeout(() => {  
+      setLoading(false);  
+      alert("🎉 Payment Successful! Your company registration is complete.");
+      
+      // Admin Panel ke live Vercel URL par redirect karein
+      window.location.href = "https://udaancompanyadminpanel-yp87.vercel.app";  
+    }, 2000);  
+  };
 
   return ( 
     <div style={{
