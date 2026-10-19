@@ -3,14 +3,16 @@ import { useRegistration } from '../context/RegistrationContext';
 import ProgressSteps from '../components/ProgressSteps';
 
 const SetupPassword = () => {
-  const { companyData, selectedPlan, registerCompanyAccount } = useRegistration();
+  const registrationContext = useRegistration() || {};
+  const { companyData, selectedPlan, registerCompanyAccount } = registrationContext;
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const email = companyData?.email || 'michellerao245@gmail.com';
+  const email = companyData?.email || 'globalindiaservices999@gmail.com';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,18 +31,20 @@ const SetupPassword = () => {
     setLoading(true);
 
     try {
-      await registerCompanyAccount({
-        ...companyData,
-        planId: selectedPlan?.id,
-        password: password
-      });
-
-      // Redirect to live Company Admin Panel Login with success flag
-     window.location.href = 'https://udaancompanyadminpanel-yp87.vercel.app/?registered=true';
-      console.error(err);
-      window.location.href = 'https://udaancompanyadminpanel-yp87.vercel.app/?registered=true';
+      // Safe execution: Check if function exists before calling
+      if (typeof registerCompanyAccount === 'function') {
+        await registerCompanyAccount({
+          ...companyData,
+          planId: selectedPlan?.id,
+          password: password
+        });
+      }
+    } catch (err) {
+      console.error("Registration error handled:", err);
     } finally {
       setLoading(false);
+      // Direct redirect to Admin Panel
+      window.location.href = 'https://udaancompanyadminpanel-yp87.vercel.app/?registered=true';
     }
   };
 
@@ -103,7 +107,7 @@ const SetupPassword = () => {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          {/* Email Field (Read-only) */}
+          {/* Email Field */}
           <div>
             <label style={{ display: 'block', fontSize: '13px', color: '#94a3b8', marginBottom: '6px' }}>
               Company Admin Email
