@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRegistration } from '../context/RegistrationContext';
 import ProgressSteps from '../components/ProgressSteps';
 
@@ -7,107 +7,13 @@ const SetupPassword = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // OTP & Timer States
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [isOtpVerified, setIsOtpVerified] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [timer, setTimer] = useState(0);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
 
   const email = companyData?.email || 'michellerao245@gmail.com';
 
-  // 30 Seconds Countdown Timer Logic
-  useEffect(() => {
-    let interval = null;
-    if (timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prevTimer) => prevTimer - 1);
-      }, 1000);
-    } else {
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [timer]);
-
-  // Send / Resend OTP Handler
-  const handleSendOtp = async () => {
-    if (timer > 0) return; // Prevent clicking while timer is running
-
-    setOtpLoading(true);
-    setError('');
-    setSuccessMsg('');
-
-    try {
-      const response = await fetch('https://udaanbackend-z5tw.vercel.app/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setOtpSent(true);
-        setTimer(30); // Start 30 second timer
-        setSuccessMsg(`OTP sent successfully to ${email}`);
-      } else {
-        setError(data.message || 'OTP bhejne mein dikkat aayi! Vercel environment variables check karein.');
-      }
-    } catch (err) {
-      console.error(err);
-      // Fallback demo mode if backend is unreachable
-      setOtpSent(true);
-      setTimer(30);
-      setSuccessMsg(`OTP sent to ${email} (Demo Mode - Use 123456)`);
-    } finally {
-      setOtpLoading(false);
-    }
-  };
-
-  // Verify OTP Handler
-  const handleVerifyOtp = async () => {
-    if (!otp || otp.length < 4) {
-      setError('Kripya sahi 6-digit OTP enter karein!');
-      return;
-    }
-
-    try {
-      const response = await fetch('https://udaanbackend-z5tw.vercel.app/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp })
-      });
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setIsOtpVerified(true);
-        setError('');
-        setSuccessMsg('✅ Email successfully verified!');
-      } else {
-        setError(data.message || 'Galat OTP! Kripya sahi OTP daalein.');
-      }
-    } catch (err) {
-      // Demo Fallback
-      if (otp === '123456' || otp.length >= 4) {
-        setIsOtpVerified(true);
-        setError('');
-        setSuccessMsg('✅ Email successfully verified!');
-      } else {
-        setError('Galat OTP! Kripya sahi OTP enter karein.');
-      }
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!isOtpVerified) {
-      setError('Pehle Email OTP verify karein!');
-      return;
-    }
 
     if (!password || password.length < 6) {
       setError('Password kam se kam 6 characters ka hona chahiye!');
@@ -129,6 +35,7 @@ const SetupPassword = () => {
         password: password
       });
 
+      // Redirect to live Company Admin Panel Login with success flag
       window.location.href = 'https://udaancompanyadminpanel-yp87.vercel.app/login?registered=true';
     } catch (err) {
       console.error(err);
@@ -185,7 +92,7 @@ const SetupPassword = () => {
             Payment Successful!
           </h2>
           <p style={{ color: '#94a3b8', fontSize: '13px', margin: 0 }}>
-            Verify your email via OTP & set a secure password for your Company Admin Account.
+            Set a secure password for your Company Admin Account.
           </p>
         </div>
 
@@ -195,90 +102,20 @@ const SetupPassword = () => {
           </div>
         )}
 
-        {successMsg && (
-          <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)', border: '1px solid #22c55e', color: '#4ade80', padding: '10px 14px', borderRadius: '8px', fontSize: '13px', marginBottom: '15px', textAlign: 'center' }}>
-            {successMsg}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          {/* Email with Send OTP Button & Timer */}
+          {/* Email Field (Read-only) */}
           <div>
             <label style={{ display: 'block', fontSize: '13px', color: '#94a3b8', marginBottom: '6px' }}>
-              Company Admin Email *
+              Company Admin Email
             </label>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <input 
-                type="email" 
-                value={email} 
-                readOnly 
-                style={{ ...inputStyle, flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.8)', color: '#94a3b8', cursor: 'default' }}
-              />
-              <button
-                type="button"
-                onClick={handleSendOtp}
-                disabled={otpLoading || isOtpVerified || timer > 0}
-                style={{
-                  backgroundColor: isOtpVerified ? '#22c55e' : timer > 0 ? '#475569' : '#38bdf8',
-                  color: isOtpVerified ? '#ffffff' : timer > 0 ? '#cbd5e1' : '#0f172a',
-                  fontWeight: 'bold',
-                  padding: '0 16px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  cursor: (isOtpVerified || timer > 0) ? 'not-allowed' : 'pointer',
-                  fontSize: '13px',
-                  whiteSpace: 'nowrap',
-                  minWidth: '110px'
-                }}
-              >
-                {isOtpVerified 
-                  ? 'Verified ✓' 
-                  : otpLoading 
-                  ? 'Sending...' 
-                  : timer > 0 
-                  ? `Resend in ${timer}s` 
-                  : otpSent 
-                  ? 'Resend OTP' 
-                  : 'Send OTP'}
-              </button>
-            </div>
+            <input 
+              type="email" 
+              value={email} 
+              readOnly 
+              style={{ ...inputStyle, backgroundColor: 'rgba(15, 23, 42, 0.8)', color: '#94a3b8', cursor: 'default' }}
+            />
           </div>
-
-          {/* OTP Input Section */}
-          {otpSent && !isOtpVerified && (
-            <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.5)', padding: '14px', borderRadius: '10px', border: '1px solid #334155' }}>
-              <label style={{ display: 'block', fontSize: '12px', color: '#38bdf8', marginBottom: '6px', fontWeight: 'bold' }}>
-                Enter OTP sent to your Email *
-              </label>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input 
-                  type="text" 
-                  value={otp} 
-                  onChange={(e) => setOtp(e.target.value)} 
-                  placeholder="Enter 6-digit OTP" 
-                  maxLength={6}
-                  style={{ ...inputStyle, flex: 1, letterSpacing: '3px', textAlign: 'center', fontSize: '15px', fontWeight: 'bold' }}
-                />
-                <button
-                  type="button"
-                  onClick={handleVerifyOtp}
-                  style={{
-                    backgroundColor: '#22c55e',
-                    color: '#ffffff',
-                    fontWeight: 'bold',
-                    padding: '0 18px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}
-                >
-                  Verify OTP
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Password Fields */}
           <div>
@@ -311,19 +148,19 @@ const SetupPassword = () => {
 
           <button 
             type="submit" 
-            disabled={loading || !isOtpVerified}
+            disabled={loading}
             style={{ 
-              backgroundColor: isOtpVerified ? '#38bdf8' : '#475569', 
-              color: isOtpVerified ? '#0f172a' : '#94a3b8', 
+              backgroundColor: '#38bdf8', 
+              color: '#0f172a', 
               fontSize: '16px', 
               fontWeight: 'bold', 
               padding: '14px', 
               border: 'none', 
               borderRadius: '10px', 
-              cursor: isOtpVerified ? 'pointer' : 'not-allowed', 
+              cursor: 'pointer', 
               width: '100%', 
               marginTop: '10px',
-              boxShadow: isOtpVerified ? '0 4px 12px rgba(56, 189, 248, 0.3)' : 'none' 
+              boxShadow: '0 4px 12px rgba(56, 189, 248, 0.3)' 
             }}
           >
             {loading ? 'Creating Account...' : 'Complete Setup & Sign In 🚀'}
