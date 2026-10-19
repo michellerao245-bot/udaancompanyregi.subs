@@ -36,10 +36,9 @@ const SetupPassword = () => {
       });
 
       // Redirect to live Company Admin Panel Login with success flag
-      window.location.href = 'https://udaancompanyadminpanel-yp87.vercel.app/login?registered=true';
-    } catch (err) {
+     window.location.href = 'https://udaancompanyadminpanel-yp87.vercel.app/?registered=true';
       console.error(err);
-      window.location.href = 'https://udaancompanyadminpanel-yp87.vercel.app/login?registered=true';
+      window.location.href = 'https://udaancompanyadminpanel-yp87.vercel.app/?registered=true';
     } finally {
       setLoading(false);
     }
