@@ -116,7 +116,7 @@ const SubscriptionPlans = () => {
             gap: '24px'  
           }} 
         >  
-          {plans.map((plan) => (  
+          {plans?.map((plan) => (  
             <PlanCard   
               key={plan.id}   
               plan={plan}   
